@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, SafeAreaView, View, StatusBar } from 'react-native';
-import {Wallet, TrendingDown} from 'lucide-react-native'
+import {Wallet, TrendingDown, Flame} from 'lucide-react-native'
 
 export default function App() {
   const [balance, setBalance] = useState(23300.00);
   const [spentToday, setSpentToday] = useState(1550.00);
+  const [roastText, setRoastText] = useState(
+  "₹1,550 spent today? Are you training to be a professional consumer or is your money just burning a hole in your pocket? Starbucks AND Zara? Calm down, millionaire."
+);
+
+  
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle='light-content' backgroundColor='#0F0F12' />
@@ -31,6 +36,20 @@ export default function App() {
           </View>
         </View>
       </View>
+
+      {/* AI Roast Bot Card  */}
+      <View style={styles.roastCard}>
+        <View style={styles.roastHeader}>
+          <Flame size={18} color="#FFA502" fill="#FFA502" />
+          <Text style={styles.roastTitle}>AI Roast Bot</Text>
+        </View>
+
+        <Text style={styles.roastContent}>"{roastText}"</Text>
+        <View style={styles.roastFooter}>
+          <Text style={styles.roastPersona}>Personality: Sarcastic Accountant</Text>
+        </View>
+      </View>
+
     </SafeAreaView>
   );
 }
@@ -106,4 +125,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+    roastCard: {
+    backgroundColor: 'rgba(255, 165, 2, 0.05)', // Subtle gold tint
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 165, 2, 0.2)', // Fire accent border
+  },
+  roastHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  roastTitle: {
+    color: '#FFA502',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    marginLeft: 6,
+  },
+  roastContent: {
+    color: '#E5E5EA',
+    fontSize: 14,
+    lineHeight: 22,
+    fontStyle: 'italic',
+    marginBottom: 12,
+  },
+  roastFooter: {
+    alignItems: 'flex-start',
+  },
+  roastPersona: {
+    color: '#8E8E93',
+    fontSize: 11,
+  },
+
 });
