@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, SafeAreaView, View, StatusBar } from "react-native";
+import { StyleSheet, Text, SafeAreaView, View, StatusBar, FlatList } from "react-native";
 import { Wallet, TrendingDown, TrendingUp, Flame } from "lucide-react-native";
 
 export default function App() {
@@ -38,6 +38,18 @@ export default function App() {
       time: "02 Sep",
     },
   ];
+
+  const renderTransactionItem = ({item}) => {
+    return(
+    <View style={styles.txItem}>
+      <View style={styles.txDetails}>
+        <Text style={styles.txTitle}>{item.title}</Text>
+        <Text style={styles.txSubtitle}>{item.category} • {item.time}</Text>
+      </View>
+      <Text style={styles.txAmount}>-₹{item.amount.toFixed(2)}</Text>
+    </View>
+)
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -114,6 +126,13 @@ export default function App() {
           </Text>
         </View>
       </View>
+
+      <Text style={styles.sectionTitle}>Recent Transactions </Text>
+      <FlatList
+       data = {MOCK_TRANSACTIONS}
+       keyExtractor={(item) => item.id}
+       renderItem={renderTransactionItem}
+      />
     </SafeAreaView>
   );
 }
@@ -234,5 +253,43 @@ const styles = StyleSheet.create({
     color: "#2ED573", // Vibrant green for credited money
     fontSize: 16,
     fontWeight: "bold",
+  },
+    sectionTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginHorizontal: 20,
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  txItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1C1C1E',
+    marginHorizontal: 20,
+    marginBottom: 10,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#2C2C2E',
+  },
+  txDetails: {
+    flex: 1,
+  },
+  txTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  txSubtitle: {
+    color: '#8E8E93',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  txAmount: {
+    color: '#FF4757',
+    fontSize: 15,
+    fontWeight: 'bold',
   },
 });
