@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, SafeAreaView, View, StatusBar, FlatList } from "react-native";
-import { Wallet, TrendingDown, TrendingUp, Flame } from "lucide-react-native";
+import { StyleSheet, Text, SafeAreaView, View, StatusBar, FlatList, Modal, TextInput, TouchableOpacity } from "react-native";
+import { Wallet, TrendingDown, TrendingUp, Flame, X, Plus } from "lucide-react-native";
 import { getTransactions, saveTransactions } from "./src/utils/storage";
 
 export default function App() {
@@ -18,6 +18,13 @@ export default function App() {
   const [roastText, setRoastText] = useState(
     "₹1,550 spent today? Are you training to be a professional consumer or is your money just burning a hole in your pocket? Starbucks AND Zara? Calm down, millionaire.",
   );
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [titleInput, setTitleInput] = useState('');
+  const [amountInput, setAmountInput] = useState('');
+  const [categoryInput, setCategoryInput] = useState('Food & Drink');
+  const [typeInput, setTypeInput] = useState('DEBIT');
+
 
     useEffect(() => {
     loadInitialData();
@@ -59,6 +66,44 @@ export default function App() {
     },
   ];
 
+  const handleAddTransactions = async() => {
+    if (!titleInput || !amountInput) return;
+
+    const parsedAmount = parseFloat(amountInput);
+
+    const newTxn = {
+      id : Date.now().toString(),
+      title: titleInput,
+      amount: parsedAmount,
+      category: categoryInput || 'General',
+      time: 'Just now',
+      type: typeInput,
+    }
+
+     const updatedTxns = [newTxn, ...transactions];
+     setTransactions(updatedTxns);
+     await saveTransactions(updatedTxns);
+
+       // Update Balance & Spent Today metrics
+    if (typeInput === 'DEBIT') {
+      setSpentToday((prev) => prev + parsedAmount);
+      setBalance((prev) => prev - parsedAmount);
+    } else {
+      setBalance((prev) => prev + parsedAmount);
+    }
+    // Update Latest Txn Badge
+    setLatestTxn({
+      title: newTxn.title,
+      amount: newTxn.amount,
+      type: newTxn.type,
+    });
+    // Reset Form & Close Modal
+    setTitleInput('');
+    setAmountInput('');
+    setModalVisible(false)
+
+  }
+
   const renderTransactionItem = ({item}) => {
     return(
     <View style={styles.txItem}>
@@ -77,9 +122,19 @@ export default function App() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Wallet size={20} color="#1E90FF" />
-        <Text style={styles.headerText}>SecureTracker</Text>
+        <View style={styles.headerTitleRow}>
+          <Wallet size={20} color="#1E90FF" style={styles.headerIcon} />
+          <Text style={styles.headerText}>SecureTracker</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Plus size={16} color="#FFFFFF" />
+          <Text style={styles.addButtonText}>Add</Text>
+        </TouchableOpacity>
       </View>
+
 
       <View style={styles.statsCard}>
         <Text style={styles.statsLabel}>Total Balance</Text>
