@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, SafeAreaView, View, StatusBar, FlatList } from "react-native";
 import { Wallet, TrendingDown, TrendingUp, Flame } from "lucide-react-native";
+import { getTransactions, saveTransactions } from "./src/utils/storage";
 
 export default function App() {
   const [balance, setBalance] = useState(23300.0);
   const [spentToday, setSpentToday] = useState(1550.0);
+
+  const [transactions, setTransactions] = useState([]);
+
   const [latestTxn, setLatestTxn] = useState({
     title: "Starbucks",
     amount: 350.0,
@@ -14,6 +18,22 @@ export default function App() {
   const [roastText, setRoastText] = useState(
     "₹1,550 spent today? Are you training to be a professional consumer or is your money just burning a hole in your pocket? Starbucks AND Zara? Calm down, millionaire.",
   );
+
+    useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  const loadInitialData = async () => {
+    const storedTxns = await getTransactions();
+    if (storedTxns && storedTxns.length > 0) {
+      setTransactions(storedTxns);
+    } else {
+      // First time opening app: save mock data to phone disk
+      setTransactions(MOCK_TRANSACTIONS);
+      await saveTransactions(MOCK_TRANSACTIONS);
+    }
+  };
+
 
   const MOCK_TRANSACTIONS = [
     {
@@ -129,7 +149,7 @@ export default function App() {
 
       <Text style={styles.sectionTitle}>Recent Transactions </Text>
       <FlatList
-       data = {MOCK_TRANSACTIONS}
+       data = {transactions}
        keyExtractor={(item) => item.id}
        renderItem={renderTransactionItem}
       />
