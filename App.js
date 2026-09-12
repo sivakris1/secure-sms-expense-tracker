@@ -120,20 +120,12 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0F0F12" />
 
-      {/* Header */}
+            {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerTitleRow}>
-          <Wallet size={20} color="#1E90FF" style={styles.headerIcon} />
-          <Text style={styles.headerText}>SecureTracker</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Plus size={16} color="#FFFFFF" />
-          <Text style={styles.addButtonText}>Add</Text>
-        </TouchableOpacity>
+        <Wallet size={20} color="#1E90FF" style={styles.headerIcon} />
+        <Text style={styles.headerText}>SecureTracker</Text>
       </View>
+
 
 
       <View style={styles.statsCard}>
@@ -186,6 +178,16 @@ export default function App() {
           </View>
         </View>
       </View>
+
+            {/* Quick Add Transaction Button */}
+      <TouchableOpacity
+        style={styles.addActionBar}
+        onPress={() => setModalVisible(true)}
+      >
+        <Plus size={18} color="#1E90FF" style={{ marginRight: 8 }} />
+        <Text style={styles.addActionBarText}>Add New Transaction</Text>
+      </TouchableOpacity>
+
 
       {/* AI Roast Bot Card  */}
       <View style={styles.roastCard}>
@@ -525,6 +527,23 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: '#FFFFFF',
     fontSize: 15,
+    fontWeight: 'bold',
+  },
+    addActionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1C1C1E',
+    marginHorizontal: 20,
+    marginTop: 16,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#1E90FF44',
+  },
+  addActionBarText: {
+    color: '#1E90FF',
+    fontSize: 14,
     fontWeight: 'bold',
   },
 });
