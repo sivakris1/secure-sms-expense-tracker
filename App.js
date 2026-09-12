@@ -66,7 +66,7 @@ export default function App() {
     },
   ];
 
-  const handleAddTransactions = async() => {
+  const handleAddTransaction = async() => {
     if (!titleInput || !amountInput) return;
 
     const parsedAmount = parseFloat(amountInput);
@@ -117,7 +117,7 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0F0F12" />
 
       {/* Header */}
@@ -208,7 +208,77 @@ export default function App() {
        keyExtractor={(item) => item.id}
        renderItem={renderTransactionItem}
       />
-    </SafeAreaView>
+
+            {/* Add Transaction Modal Popup */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Transaction</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <X size={20} color="#8E8E93" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Inputs */}
+            <TextInput
+              style={styles.input}
+              placeholder="Title (e.g. Starbucks)"
+              placeholderTextColor="#666"
+              value={titleInput}
+              onChangeText={setTitleInput}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Amount (₹)"
+              placeholderTextColor="#666"
+              keyboardType="numeric"
+              value={amountInput}
+              onChangeText={setAmountInput}
+            />
+
+            {/* Type Selector (Debit / Credit) */}
+            <View style={styles.typeSelectorRow}>
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  typeInput === 'DEBIT' && styles.typeButtonActiveDebit,
+                ]}
+                onPress={() => setTypeInput('DEBIT')}
+              >
+                <Text style={styles.typeButtonText}>Debited (-)</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  typeInput === 'CREDIT' && styles.typeButtonActiveCredit,
+                ]}
+                onPress={() => setTypeInput('CREDIT')}
+              >
+                <Text style={styles.typeButtonText}>Credited (+)</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Save Button */}
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleAddTransaction}
+            >
+              <Text style={styles.saveButtonText}>Save Transaction</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+    </View>
   );
 }
 
@@ -364,6 +434,96 @@ const styles = StyleSheet.create({
   },
   txAmount: {
     color: '#FF4757',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+    headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1E90FF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#1C1C1E',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: '#2C2C2E',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  input: {
+    backgroundColor: '#0F0F12',
+    color: '#FFFFFF',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#2C2C2E',
+  },
+  typeSelectorRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 20,
+  },
+  typeButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: '#0F0F12',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2C2C2E',
+  },
+  typeButtonActiveDebit: {
+    backgroundColor: '#FF475722',
+    borderColor: '#FF4757',
+  },
+  typeButtonActiveCredit: {
+    backgroundColor: '#2ED57322',
+    borderColor: '#2ED573',
+  },
+  typeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  saveButton: {
+    backgroundColor: '#1E90FF',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: 'bold',
   },
