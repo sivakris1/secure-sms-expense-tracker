@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, SafeAreaView, View, StatusBar, FlatList, Modal, TextInput, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, StatusBar, FlatList, Modal, TextInput, TouchableOpacity, NativeEventEmitter, NativeModules } from "react-native";
 import { Wallet, TrendingDown, TrendingUp, Flame, X, Plus } from "lucide-react-native";
 import { getTransactions, saveTransactions } from "./src/utils/storage";
 
@@ -28,6 +28,42 @@ export default function App() {
 
     useEffect(() => {
     loadInitialData();
+
+     // Dot 4: Connect listener to our Kotlin SmsModule pipe!
+      const eventEmitter = new NativeEventEmitter(NativeModules.SmsModule);
+      const subscription = eventEmitter.addListener("onSMSReceived", (smsData) => {
+      console.log("Received native SMS event:", smsData);
+
+      const parsedAmount = smsData.amount || 0;
+      const newTxn = {
+        id : Date.now().toString(),
+        title : smsData.title,
+        amount: parsedAmount,
+        category: "Auto SMS",
+        time: "Just now",
+        type: smsData.type || "DEBIT",
+      }
+
+      setTransactions((prev) => {
+        const updated = [newTxn, ...prev];
+        saveTransactions(updated);
+        return updated;
+      })
+      
+      if (newTxn.type === "DEBIT") {
+        setSpentToday((prev) => prev + parsedAmount);
+        setBalance((prev) => prev - parsedAmount);
+      } else {
+        setBalance((prev) => prev + parsedAmount);
+      }
+      
+      setLatestTxn({
+        title: newTxn.title,
+        amount: newTxn.amount,
+        type: newTxn.type,
+      });
+    });
+    return () => subscription.remove();
   }, []);
 
   const loadInitialData = async () => {
@@ -211,7 +247,7 @@ export default function App() {
        renderItem={renderTransactionItem}
       />
 
-            {/* Add Transaction Modal Popup */}
+      {/* Add Transaction Modal Popup */}
       <Modal
         visible={modalVisible}
         animationType="slide"
