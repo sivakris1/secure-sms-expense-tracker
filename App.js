@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, StatusBar, FlatList, Modal, TextInput, TouchableOpacity, NativeEventEmitter, NativeModules } from "react-native";
-import { Wallet, TrendingDown, TrendingUp, Flame, X, Plus } from "lucide-react-native";
+import { Wallet, TrendingDown, TrendingUp, Flame, X, Plus, RefreshCcw } from "lucide-react-native";
 import { getTransactions, saveTransactions } from "./src/utils/storage";
+import { generateAIRoast } from "./src/services/aiRoastService";
+
 
 export default function App() {
   const [balance, setBalance] = useState(23300.0);
@@ -43,6 +45,12 @@ export default function App() {
         time: "Just now",
         type: smsData.type || "DEBIT",
       }
+
+        const handleRefreshRoast = () => {
+    const newRoast = generateAIRoast(transactions, spentToday);
+    setRoastText(newRoast);
+  };
+
 
       setTransactions((prev) => {
         const updated = [newTxn, ...prev];
@@ -225,11 +233,16 @@ export default function App() {
       </TouchableOpacity>
 
 
-      {/* AI Roast Bot Card  */}
+            {/* AI Roast Bot Card */}
       <View style={styles.roastCard}>
         <View style={styles.roastHeader}>
-          <Flame size={18} color="#FFA502" fill="#FFA502" />
-          <Text style={styles.roastTitle}>AI Roast Bot</Text>
+          <View style={styles.roastTitleRow}>
+            <Flame size={18} color="#FFA502" fill="#FFA502" />
+            <Text style={styles.roastTitle}>AI Roast Bot</Text>
+          </View>
+          <TouchableOpacity onPress={handleRefreshRoast}>
+            <RefreshCw size={16} color="#FFA502" />
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.roastContent}>"{roastText}"</Text>
@@ -239,6 +252,7 @@ export default function App() {
           </Text>
         </View>
       </View>
+
 
       <Text style={styles.sectionTitle}>Recent Transactions </Text>
       <FlatList
@@ -582,4 +596,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+    roastTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  roastHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+
 });
