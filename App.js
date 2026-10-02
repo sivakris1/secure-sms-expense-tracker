@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, StatusBar, FlatList, Modal, TextInput, TouchableOpacity, NativeEventEmitter, NativeModules } from "react-native";
-import { Wallet, TrendingDown, TrendingUp, Flame, X, Plus, RefreshCcw } from "lucide-react-native";
+import { Wallet, TrendingDown, TrendingUp, Flame, X, Plus, RefreshCw } from "lucide-react-native";
 import { getTransactions, saveTransactions } from "./src/utils/storage";
 import { generateAIRoast } from "./src/services/aiRoastService";
 
@@ -45,11 +45,6 @@ export default function App() {
         time: "Just now",
         type: smsData.type || "DEBIT",
       }
-
-        const handleRefreshRoast = () => {
-    const newRoast = generateAIRoast(transactions, spentToday);
-    setRoastText(newRoast);
-  };
 
 
       setTransactions((prev) => {
@@ -110,6 +105,11 @@ export default function App() {
     },
   ];
 
+  const handleRefreshRoast = () => {
+    const newRoast = generateAIRoast(transactions, spentToday);
+    setRoastText(newRoast);
+  };
+
   const handleAddTransaction = async() => {
     if (!titleInput || !amountInput) return;
 
@@ -123,6 +123,7 @@ export default function App() {
       time: 'Just now',
       type: typeInput,
     }
+
 
      const updatedTxns = [newTxn, ...transactions];
      setTransactions(updatedTxns);
@@ -145,6 +146,9 @@ export default function App() {
     setTitleInput('');
     setAmountInput('');
     setModalVisible(false)
+
+    const updatedRoast = generateAIRoast(updatedTxns, spentToday)
+     setRoastText(updatedRoast);
 
   }
 
