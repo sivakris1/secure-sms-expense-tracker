@@ -6,8 +6,8 @@ import { generateAIRoast } from "./src/services/aiRoastService";
 
 
 export default function App() {
-  const [balance, setBalance] = useState(23300.0);
-  const [spentToday, setSpentToday] = useState(1550.0);
+  const [balance, setBalance] = useState(0);
+  const [spentToday, setSpentToday] = useState(0);
 
   const [transactions, setTransactions] = useState([]);
 
@@ -35,6 +35,11 @@ export default function App() {
       const eventEmitter = new NativeEventEmitter(NativeModules.SmsModule);
       const subscription = eventEmitter.addListener("onSMSReceived", (smsData) => {
       console.log("Received native SMS event:", smsData);
+
+      // Auto-update official bank available balance if present in SMS
+      if (smsData.availBalance) {
+        setBalance(smsData.availBalance);
+      }
 
       const parsedAmount = smsData.amount || 0;
       const newTxn = {
@@ -177,9 +182,11 @@ export default function App() {
 
 
       <View style={styles.statsCard}>
-        <Text style={styles.statsLabel}>Total Balance</Text>
+        <Text style={styles.statsLabel}>Available Bank Balance (Bank Verified)</Text>
         <Text style={styles.balanceText}>
-          ₹{balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          {balance !== null
+            ? `₹${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+            : "Waiting for Bank SMS..."}
         </Text>
 
         <View style={styles.spentRow}>
@@ -191,7 +198,7 @@ export default function App() {
                 color="#FF4757"
                 style={styles.iconMargin}
               />
-              <Text style={styles.spentText}>₹{spentToday.toFixed(2)}</Text>
+              <Text style={styles.spentText}>₹{(spentToday || 0).toFixed(2)}</Text>
             </View>
           </View>
 
