@@ -21,10 +21,11 @@ class SmsReceiver : BroadcastReceiver() {
                 // Check if incoming SMS is a bank transaction text
                 if (isBankTransaction(body)) {
                     val amount = extractAmount(body)
+                    val availBal = extractAvailBalance(body)
                     val isDebit = body.lowercase().contains("debited") || body.lowercase().contains("spent")
                     val type = if (isDebit) "DEBIT" else "CREDIT"
 
-                    Log.d("SMSReceiver", "Extracted Transaction: Amount=₹$amount, Type=$type")
+                    Log.d("SMSReceiver", "Extracted: Amount=₹$amount, AvailBal=₹$availBal, Type=$type")
 
                     // Push transaction event across bridge to React Native!
                     val params = com.facebook.react.bridge.Arguments.createMap().apply {
@@ -32,6 +33,9 @@ class SmsReceiver : BroadcastReceiver() {
                         putDouble("amount", amount)
                         putString("type", type)
                         putString("category", "Bank SMS")
+                        if (availBal != null) {
+                            putDouble("availBalance", availBal)
+                        }
                     }
                     SmsModule.sendEvent("onSMSReceived", params)
                 }
@@ -48,5 +52,11 @@ class SmsReceiver : BroadcastReceiver() {
         val regex = Regex("""(?i)(?:rs|inr|₹)\.?\s*([\d,]+(?:\.\d{1,2})?)""")
         val match = regex.find(body)
         return match?.groupValues?.get(1)?.replace(",", "")?.toDoubleOrNull() ?: 0.0
+    }
+
+    private fun extractAvailBalance(body: String): Double? {
+        val regex = Regex("""(?i)(?:avail|available|avl|updated)\s*(?:bal|balance)\:?\s*(?:rs|inr|₹)?\.?\s*([\d,]+(?:\.\d{1,2})?)""")
+        val match = regex.find(body)
+        return match?.groupValues?.get(1)?.replace(",", "")?.toDoubleOrNull()
     }
 }

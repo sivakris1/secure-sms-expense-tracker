@@ -58,7 +58,10 @@ export default function App() {
       (smsData) => {
         console.log("Received native SMS event:", smsData);
 
-       
+        if (!isTrackingActive) {
+          console.log("Tracking is PAUSED! Ignoring incoming SMS transaction.");
+          return; //  Stop! Don't add to state, balance, or storage!
+        }
 
         // Auto-update official bank available balance if present in SMS
         if (smsData.availBalance) {
