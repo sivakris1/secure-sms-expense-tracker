@@ -1,9 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, StatusBar, FlatList, Modal, TextInput, TouchableOpacity, NativeEventEmitter, NativeModules } from "react-native";
-import { Wallet, TrendingDown, TrendingUp, Flame, X, Plus, RefreshCw } from "lucide-react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  StatusBar,
+  FlatList,
+  Modal,
+  TextInput,
+  TouchableOpacity,
+  NativeEventEmitter,
+  NativeModules,
+} from "react-native";
+import {
+  Wallet,
+  TrendingDown,
+  TrendingUp,
+  Flame,
+  X,
+  Plus,
+  RefreshCw,
+  PlayCircle,
+  PauseCircle,
+} from "lucide-react-native";
 import { getTransactions, saveTransactions } from "./src/utils/storage";
 import { generateAIRoast } from "./src/services/aiRoastService";
-
 
 export default function App() {
   const [balance, setBalance] = useState(0);
@@ -22,55 +42,59 @@ export default function App() {
   );
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [titleInput, setTitleInput] = useState('');
-  const [amountInput, setAmountInput] = useState('');
-  const [categoryInput, setCategoryInput] = useState('Food & Drink');
-  const [typeInput, setTypeInput] = useState('DEBIT');
+  const [titleInput, setTitleInput] = useState("");
+  const [amountInput, setAmountInput] = useState("");
+  const [categoryInput, setCategoryInput] = useState("Food & Drink");
+  const [typeInput, setTypeInput] = useState("DEBIT");
+  const [isTrackingActive, setIsTrackingActive] = useState(true);
 
-
-    useEffect(() => {
+  useEffect(() => {
     loadInitialData();
 
-     // Dot 4: Connect listener to our Kotlin SmsModule pipe!
-      const eventEmitter = new NativeEventEmitter(NativeModules.SmsModule);
-      const subscription = eventEmitter.addListener("onSMSReceived", (smsData) => {
-      console.log("Received native SMS event:", smsData);
+    // Dot 4: Connect listener to our Kotlin SmsModule pipe!
+    const eventEmitter = new NativeEventEmitter(NativeModules.SmsModule);
+    const subscription = eventEmitter.addListener(
+      "onSMSReceived",
+      (smsData) => {
+        console.log("Received native SMS event:", smsData);
 
-      // Auto-update official bank available balance if present in SMS
-      if (smsData.availBalance) {
-        setBalance(smsData.availBalance);
-      }
+       
 
-      const parsedAmount = smsData.amount || 0;
-      const newTxn = {
-        id : Date.now().toString(),
-        title : smsData.title,
-        amount: parsedAmount,
-        category: "Auto SMS",
-        time: "Just now",
-        type: smsData.type || "DEBIT",
-      }
+        // Auto-update official bank available balance if present in SMS
+        if (smsData.availBalance) {
+          setBalance(smsData.availBalance);
+        }
 
+        const parsedAmount = smsData.amount || 0;
+        const newTxn = {
+          id: Date.now().toString(),
+          title: smsData.title,
+          amount: parsedAmount,
+          category: "Auto SMS",
+          time: "Just now",
+          type: smsData.type || "DEBIT",
+        };
 
-      setTransactions((prev) => {
-        const updated = [newTxn, ...prev];
-        saveTransactions(updated);
-        return updated;
-      })
-      
-      if (newTxn.type === "DEBIT") {
-        setSpentToday((prev) => prev + parsedAmount);
-        setBalance((prev) => prev - parsedAmount);
-      } else {
-        setBalance((prev) => prev + parsedAmount);
-      }
-      
-      setLatestTxn({
-        title: newTxn.title,
-        amount: newTxn.amount,
-        type: newTxn.type,
-      });
-    });
+        setTransactions((prev) => {
+          const updated = [newTxn, ...prev];
+          saveTransactions(updated);
+          return updated;
+        });
+
+        if (newTxn.type === "DEBIT") {
+          setSpentToday((prev) => prev + parsedAmount);
+          setBalance((prev) => prev - parsedAmount);
+        } else {
+          setBalance((prev) => prev + parsedAmount);
+        }
+
+        setLatestTxn({
+          title: newTxn.title,
+          amount: newTxn.amount,
+          type: newTxn.type,
+        });
+      },
+    );
     return () => subscription.remove();
   }, []);
 
@@ -84,7 +108,6 @@ export default function App() {
       await saveTransactions(MOCK_TRANSACTIONS);
     }
   };
-
 
   const MOCK_TRANSACTIONS = [
     {
@@ -115,27 +138,26 @@ export default function App() {
     setRoastText(newRoast);
   };
 
-  const handleAddTransaction = async() => {
+  const handleAddTransaction = async () => {
     if (!titleInput || !amountInput) return;
 
     const parsedAmount = parseFloat(amountInput);
 
     const newTxn = {
-      id : Date.now().toString(),
+      id: Date.now().toString(),
       title: titleInput,
       amount: parsedAmount,
-      category: categoryInput || 'General',
-      time: 'Just now',
+      category: categoryInput || "General",
+      time: "Just now",
       type: typeInput,
-    }
+    };
 
+    const updatedTxns = [newTxn, ...transactions];
+    setTransactions(updatedTxns);
+    await saveTransactions(updatedTxns);
 
-     const updatedTxns = [newTxn, ...transactions];
-     setTransactions(updatedTxns);
-     await saveTransactions(updatedTxns);
-
-       // Update Balance & Spent Today metrics
-    if (typeInput === 'DEBIT') {
+    // Update Balance & Spent Today metrics
+    if (typeInput === "DEBIT") {
       setSpentToday((prev) => prev + parsedAmount);
       setBalance((prev) => prev - parsedAmount);
     } else {
@@ -148,41 +170,73 @@ export default function App() {
       type: newTxn.type,
     });
     // Reset Form & Close Modal
-    setTitleInput('');
-    setAmountInput('');
-    setModalVisible(false)
+    setTitleInput("");
+    setAmountInput("");
+    setModalVisible(false);
 
-    const updatedRoast = generateAIRoast(updatedTxns, spentToday)
-     setRoastText(updatedRoast);
+    const updatedRoast = generateAIRoast(updatedTxns, spentToday);
+    setRoastText(updatedRoast);
+  };
 
-  }
-
-  const renderTransactionItem = ({item}) => {
-    return(
-    <View style={styles.txItem}>
-      <View style={styles.txDetails}>
-        <Text style={styles.txTitle}>{item.title}</Text>
-        <Text style={styles.txSubtitle}>{item.category} • {item.time}</Text>
+  const renderTransactionItem = ({ item }) => {
+    return (
+      <View style={styles.txItem}>
+        <View style={styles.txDetails}>
+          <Text style={styles.txTitle}>{item.title}</Text>
+          <Text style={styles.txSubtitle}>
+            {item.category} • {item.time}
+          </Text>
+        </View>
+        <Text style={styles.txAmount}>-₹{item.amount.toFixed(2)}</Text>
       </View>
-      <Text style={styles.txAmount}>-₹{item.amount.toFixed(2)}</Text>
-    </View>
-)
-  }
+    );
+  };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0F0F12" />
 
-            {/* Header */}
+      {/* Header */}
       <View style={styles.header}>
-        <Wallet size={20} color="#1E90FF" style={styles.headerIcon} />
-        <Text style={styles.headerText}>SecureTracker</Text>
+        <View style={styles.headerTitleRow}>
+          <Wallet size={20} color="#1E90FF" style={styles.headerIcon} />
+          <Text style={styles.headerText}>SecureTracker</Text>
+        </View>
+
+        {/* Pause or Resume button  */}
+        <TouchableOpacity
+          style={[
+            styles.trackingBadge,
+            !isTrackingActive && styles.trackingBadgePaused,
+          ]}
+          onPress={() => setIsTrackingActive((prev) => !prev)}
+        >
+          {isTrackingActive ? (
+            <>
+              <PlayCircle
+                size={14}
+                color="#2ED573"
+                style={{ marginRight: 4 }}
+              />
+              <Text style={styles.trackingActiveText}>Tracking ON</Text>
+            </>
+          ) : (
+            <>
+              <PauseCircle
+                size={14}
+                color="#FFA502"
+                style={{ marginRight: 4 }}
+              />
+              <Text style={styles.trackingPausedText}>PAUSED</Text>
+            </>
+          )}
+        </TouchableOpacity>
       </View>
 
-
-
       <View style={styles.statsCard}>
-        <Text style={styles.statsLabel}>Available Bank Balance (Bank Verified)</Text>
+        <Text style={styles.statsLabel}>
+          Available Bank Balance (Bank Verified)
+        </Text>
         <Text style={styles.balanceText}>
           {balance !== null
             ? `₹${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
@@ -198,7 +252,9 @@ export default function App() {
                 color="#FF4757"
                 style={styles.iconMargin}
               />
-              <Text style={styles.spentText}>₹{(spentToday || 0).toFixed(2)}</Text>
+              <Text style={styles.spentText}>
+                ₹{(spentToday || 0).toFixed(2)}
+              </Text>
             </View>
           </View>
 
@@ -234,7 +290,7 @@ export default function App() {
         </View>
       </View>
 
-            {/* Quick Add Transaction Button */}
+      {/* Quick Add Transaction Button */}
       <TouchableOpacity
         style={styles.addActionBar}
         onPress={() => setModalVisible(true)}
@@ -243,8 +299,7 @@ export default function App() {
         <Text style={styles.addActionBarText}>Add New Transaction</Text>
       </TouchableOpacity>
 
-
-            {/* AI Roast Bot Card */}
+      {/* AI Roast Bot Card */}
       <View style={styles.roastCard}>
         <View style={styles.roastHeader}>
           <View style={styles.roastTitleRow}>
@@ -264,12 +319,11 @@ export default function App() {
         </View>
       </View>
 
-
       <Text style={styles.sectionTitle}>Recent Transactions </Text>
       <FlatList
-       data = {transactions}
-       keyExtractor={(item) => item.id}
-       renderItem={renderTransactionItem}
+        data={transactions}
+        keyExtractor={(item) => item.id}
+        renderItem={renderTransactionItem}
       />
 
       {/* Add Transaction Modal Popup */}
@@ -312,9 +366,9 @@ export default function App() {
               <TouchableOpacity
                 style={[
                   styles.typeButton,
-                  typeInput === 'DEBIT' && styles.typeButtonActiveDebit,
+                  typeInput === "DEBIT" && styles.typeButtonActiveDebit,
                 ]}
-                onPress={() => setTypeInput('DEBIT')}
+                onPress={() => setTypeInput("DEBIT")}
               >
                 <Text style={styles.typeButtonText}>Debited (-)</Text>
               </TouchableOpacity>
@@ -322,9 +376,9 @@ export default function App() {
               <TouchableOpacity
                 style={[
                   styles.typeButton,
-                  typeInput === 'CREDIT' && styles.typeButtonActiveCredit,
+                  typeInput === "CREDIT" && styles.typeButtonActiveCredit,
                 ]}
-                onPress={() => setTypeInput('CREDIT')}
+                onPress={() => setTypeInput("CREDIT")}
               >
                 <Text style={styles.typeButtonText}>Credited (+)</Text>
               </TouchableOpacity>
@@ -340,7 +394,6 @@ export default function App() {
           </View>
         </View>
       </Modal>
-
     </View>
   );
 }
@@ -462,98 +515,98 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-    sectionTitle: {
-    color: '#FFFFFF',
+  sectionTitle: {
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginHorizontal: 20,
     marginTop: 24,
     marginBottom: 12,
   },
   txItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#1C1C1E',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1C1C1E",
     marginHorizontal: 20,
     marginBottom: 10,
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: "#2C2C2E",
   },
   txDetails: {
     flex: 1,
   },
   txTitle: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   txSubtitle: {
-    color: '#8E8E93',
+    color: "#8E8E93",
     fontSize: 12,
     marginTop: 2,
   },
   txAmount: {
-    color: '#FF4757',
+    color: "#FF4757",
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
-    headerTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1E90FF',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1E90FF",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
   addButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 4,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: '#1C1C1E',
+    backgroundColor: "#1C1C1E",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: "#2C2C2E",
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   modalTitle: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   input: {
-    backgroundColor: '#0F0F12',
-    color: '#FFFFFF',
+    backgroundColor: "#0F0F12",
+    color: "#FFFFFF",
     borderRadius: 12,
     padding: 14,
     fontSize: 14,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: "#2C2C2E",
   },
   typeSelectorRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
     marginBottom: 20,
   },
@@ -561,61 +614,84 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 12,
     borderRadius: 10,
-    backgroundColor: '#0F0F12',
-    alignItems: 'center',
+    backgroundColor: "#0F0F12",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#2C2C2E',
+    borderColor: "#2C2C2E",
   },
   typeButtonActiveDebit: {
-    backgroundColor: '#FF475722',
-    borderColor: '#FF4757',
+    backgroundColor: "#FF475722",
+    borderColor: "#FF4757",
   },
   typeButtonActiveCredit: {
-    backgroundColor: '#2ED57322',
-    borderColor: '#2ED573',
+    backgroundColor: "#2ED57322",
+    borderColor: "#2ED573",
   },
   typeButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   saveButton: {
-    backgroundColor: '#1E90FF',
+    backgroundColor: "#1E90FF",
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   saveButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
-    addActionBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1C1C1E',
+  addActionBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#1C1C1E",
     marginHorizontal: 20,
     marginTop: 16,
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#1E90FF44',
+    borderColor: "#1E90FF44",
   },
   addActionBarText: {
-    color: '#1E90FF',
+    color: "#1E90FF",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
-    roastTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  roastTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   roastHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 10,
   },
-
+  trackingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(46, 213, 115, 0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(46, 213, 115, 0.4)",
+  },
+  trackingBadgePaused: {
+    backgroundColor: "rgba(255, 165, 2, 0.15)",
+    borderColor: "rgba(255, 165, 2, 0.4)",
+  },
+  trackingActiveText: {
+    color: "#2ED573",
+    fontSize: 11,
+    fontWeight: "bold",
+  },
+  trackingPausedText: {
+    color: "#FFA502",
+    fontSize: 11,
+    fontWeight: "bold",
+  },
 });
