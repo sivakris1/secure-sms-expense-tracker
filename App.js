@@ -51,7 +51,7 @@ export default function App() {
   useEffect(() => {
     loadInitialData();
 
-    // Dot 4: Connect listener to our Kotlin SmsModule pipe!
+    //  Connect listener to Kotlin SmsModule pipe!
     const eventEmitter = new NativeEventEmitter(NativeModules.SmsModule);
     const subscription = eventEmitter.addListener(
       "onSMSReceived",
@@ -60,7 +60,7 @@ export default function App() {
 
         if (!isTrackingActive) {
           console.log("Tracking is PAUSED! Ignoring incoming SMS transaction.");
-          return; //  Stop! Don't add to state, balance, or storage!
+          return; 
         }
 
         // Auto-update official bank available balance if present in SMS
@@ -199,7 +199,6 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0F0F12" />
 
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTitleRow}>
           <Wallet size={20} color="#1E90FF" style={styles.headerIcon} />
@@ -261,7 +260,7 @@ export default function App() {
             </View>
           </View>
 
-          {/* Latest Transaction  */}
+          {/* Latest Transaction Display*/}
           <View style={styles.statsHalf}>
             <Text style={styles.statsSublabel}>Latest {latestTxn.title}</Text>
             <View style={styles.spentRow}>
@@ -329,7 +328,7 @@ export default function App() {
         renderItem={renderTransactionItem}
       />
 
-      {/* Add Transaction Modal Popup */}
+      {/* Add Transaction Manually */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -338,7 +337,6 @@ export default function App() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {/* Modal Header */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Add Transaction</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -346,7 +344,6 @@ export default function App() {
               </TouchableOpacity>
             </View>
 
-            {/* Inputs */}
             <TextInput
               style={styles.input}
               placeholder="Title (e.g. Starbucks)"
