@@ -24,6 +24,7 @@ import {
 } from "lucide-react-native";
 import { getTransactions, saveTransactions } from "./src/utils/storage";
 import { generateAIRoast } from "./src/services/aiRoastService";
+import { PermissionsAndroid } from 'react-native';
 
 export default function App() {
   const [balance, setBalance] = useState(0);
@@ -50,6 +51,8 @@ export default function App() {
 
   useEffect(() => {
     loadInitialData();
+    requestSMSPermission();
+
 
     //  Connect listener to Kotlin SmsModule pipe!
     const eventEmitter = new NativeEventEmitter(NativeModules.SmsModule);
@@ -100,6 +103,17 @@ export default function App() {
     );
     return () => subscription.remove();
   }, []);
+
+  const requestSMSPermission = async () => {
+  try {
+    await PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+      PermissionsAndroid.PERMISSIONS.READ_SMS,
+    ]);
+  } catch (err) {
+    console.warn(err);
+  }
+};
 
   const loadInitialData = async () => {
     const storedTxns = await getTransactions();
