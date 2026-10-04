@@ -55,7 +55,7 @@ class SmsReceiver : BroadcastReceiver() {
     }
 
     private fun extractAvailBalance(body: String): Double? {
-        val regex = Regex("""(?i)(?:avail|available|avl|updated)\s*(?:bal|balance)\:?\s*(?:rs|inr|₹)?\.?\s*([\d,]+(?:\.\d{1,2})?)""")
+        val regex = Regex("""(?i)(?:avail|available|avl|updated|total)\s*(?:bal|balance)\:?\s*(?:rs|inr|₹)?\.?\s*([\d,]+(?:\.\d{1,2})?)""")
         val match = regex.find(body)
         return match?.groupValues?.get(1)?.replace(",", "")?.toDoubleOrNull()
     }
