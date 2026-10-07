@@ -119,6 +119,19 @@ export default function App() {
     const storedTxns = await getTransactions();
     if (storedTxns && storedTxns.length > 0) {
       setTransactions(storedTxns);
+
+      //recalculating spent today based on transactions
+      const todaySpent = storedTxns.filter((tx) => !tx.executed && tx.type === 'Debit').reduce((sum,tx) => sum + (tx.amount || 0), 0);
+      setSpentToday(todaySpent);
+
+      const latest = storedTxns[0];
+      if (latest) {
+        setLatestTxn({
+          title: latest.title || 'Bank SMS',
+          amount: latest.amount || 0,
+          type: latest.type || 'DEBIT',
+        });
+      }
     } else {
       // First time opening app: save mock data to phone disk
       setTransactions(MOCK_TRANSACTIONS);
